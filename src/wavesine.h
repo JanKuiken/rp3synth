@@ -10,6 +10,7 @@ public:
     void Start(double in_frequency);
     double Next();
 
+private:
     int rate;          // samples per seconds
     double phi;
     double phi_step;
