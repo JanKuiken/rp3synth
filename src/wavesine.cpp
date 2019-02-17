@@ -1,6 +1,6 @@
 #include "wavesine.h"
 
-#include <math.h>
+#include <cmath>
 
 WaveSine::WaveSine(int in_rate)
 {
@@ -15,8 +15,8 @@ void WaveSine::Start(double in_frequency) {
 double WaveSine::Next() {
     double retval = sin(phi);
     phi += phi_step;
-    if (phi >= M_2_PI) {
-        phi -= M_2_PI;
+    if (phi >= 2 * M_PI) {
+        phi -= 2 * M_PI;
     }
     return retval;
 }

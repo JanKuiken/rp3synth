@@ -1,7 +1,6 @@
 #include "voice.h"
 
 #include <cmath>
-#include <iostream>  // TODO: moet weer weg
 
 Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
              std::shared_ptr<VoiceGlobals> in_voice_globals, int in_number)
@@ -21,10 +20,9 @@ Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
 void Voice::Start(int in_note)
 {
     note = in_note;
-    //std::cout << "Voice start " << in_note << std::endl;
 
     double halve_note = pow(2.0, 1.0/12.0);
-    double frequency = 440.0 * pow(halve_note, (note-57) -48);
+    double frequency = 440.0 * pow(halve_note, (note-57));
 
     wave_sine->Start(frequency);
     main_adsr->Start(voice_settings->attack,
@@ -52,11 +50,9 @@ int Voice::GetNote()
 
 void Voice::FillBuffer()
 {
-    //std::cout << "FillBuffer " << std::endl;
     buf = 0.0;
     for (int i=0; i<voice_globals->bufsize; i++) {
         buf[i] = wave_sine->Next() * main_adsr->Next(stop);
-        //std::cout << "FillBuffer : " << i << " " << buf[i] << std::endl;
     }
     active = main_adsr->isActive();
 }
