@@ -1,0 +1,9 @@
+src/*.o
+src/rp3synth.config
+src/rp3synth.creator
+src/rp3synth.creator.user
+src/rp3synth.files
+src/rp3synth.includes
+run
+run/*
+
