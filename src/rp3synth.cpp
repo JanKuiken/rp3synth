@@ -1,7 +1,5 @@
 #include "rp3synth.h"
 
-#include <alsa/asoundlib.h>
-
 #include <iostream>  // TODO: moet weer weg
 #include <valarray>
 
@@ -27,9 +25,7 @@ void RP3Synth::PlaybackCallback(short* buf)
 
     for (std::shared_ptr<Voice> voice : voices) {
         if (voice->IsActive()) {
-            //std::shared_ptr<std::valarray<double>> vbuf = voice->GetBuffer();
             voice->FillBuffer();
-            //std::cout << "count " << voice->buf.size() << std::endl;
             tmp_buf += voice->buf;
         }
     }
@@ -47,8 +43,6 @@ void RP3Synth::PlaybackCallback(short* buf)
 
 void RP3Synth::MidiCallback(snd_seq_event_t *ev)
 {
-    //return;
-    //std::cout << "RP3Synth::MidiCallback 0x" << std::hex << ev->data.note.note << std::endl;
     std::shared_ptr<Voice> voice;
 
     // fix for some keyboards, including mine, which do not send a note-off
@@ -60,22 +54,16 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
 
     switch (ev->type) {
         case SND_SEQ_EVENT_PITCHBEND:
-            //pitch = (double)ev->data.control.value / 8192.0;
-            //std::cout << "pitchbend : " << ev->data.control.value << std::endl;
+            std::cout << "pitchbend : " << ev->data.control.value << std::endl;
             break;
         case SND_SEQ_EVENT_CONTROLLER:
-            //if (ev->data.control.param == 1) {
-            //    modulation = (double)ev->data.control.value / 10.0;
-            //}
             std::cout << "modulator : " << ev->data.control.value << std::endl;
             break;
         case SND_SEQ_EVENT_NOTEON:
             voice = FindFreeVoice();
             if (voice)
             {
-                //std::cout << "Start event" << std::endl;
                 voice->Start(ev->data.note.note);
-                //std::cout << "Start event2" << std::endl;
             }
             break;
         case SND_SEQ_EVENT_NOTEOFF:
@@ -118,5 +106,3 @@ std::shared_ptr<Voice> RP3Synth::FindActiveVoice(int in_note)
     }
     return nullptr;
 }
-
-
