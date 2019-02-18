@@ -1,11 +1,13 @@
 #include "adsr.h"
 
-#include <iostream>
-
 ADSR::ADSR(int in_rate) {
     rate    = in_rate;
     state   = idle;
     stopped = false;
+}
+
+bool ADSR::isActive() {
+    return state != idle;
 }
 
 void ADSR::Start(double in_attack,
@@ -13,17 +15,12 @@ void ADSR::Start(double in_attack,
                  double in_sustain,
                  double in_release) {
 
-    attack  = in_attack;
-    decay   = in_decay;
-    sustain = in_sustain;
-    release = in_release;
-
-    attack_ticks = attack * rate;
-    decay_ticks = decay * rate;
-    release_ticks = release * rate;
+    attack_ticks  = rate * in_attack;
+    decay_ticks   = rate * in_decay;
+    sustain       =        in_sustain;
+    release_ticks = rate * in_release;
 
     state   = key_attack;
-    //std::cout << "adsr attack" << std::endl;
     stopped = false;
 }
 
@@ -44,7 +41,6 @@ double ADSR::Next(bool in_stop) {
         if (counter > attack_ticks) {
             state = key_decay;
             counter = 0;
-            //std::cout << "adsr decay" << std::endl;
         }
         break;
 
@@ -54,7 +50,6 @@ double ADSR::Next(bool in_stop) {
         if (counter > decay_ticks) {
             state = key_sustain;
             counter = 0;
-            //std::cout << "adsr sustain" << std::endl;
         }
         break;
 
@@ -63,7 +58,6 @@ double ADSR::Next(bool in_stop) {
         if (stopped) {
             state = key_release;
             counter = 0;
-            //std::cout << "adsr release" << std::endl;
         }
         break;
 
@@ -72,13 +66,9 @@ double ADSR::Next(bool in_stop) {
         counter++;
         if (counter >= release_ticks) {
             state = idle;
-            //std::cout << "adsr idle" << std::endl;
         }
         break;
     }
     return retval;
-}
-bool ADSR::isActive() {
-    return state != idle;
 }
 

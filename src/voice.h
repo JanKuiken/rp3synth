@@ -25,7 +25,6 @@ public:
     int number;
 
 private:
-
     int note;
     bool active;
     bool stop;

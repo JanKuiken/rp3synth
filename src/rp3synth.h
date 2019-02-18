@@ -4,11 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-
 #include <alsa/asoundlib.h>
-
-#include <string>
 
 #include "voicesettings.h"
 #include "voiceglobals.h"

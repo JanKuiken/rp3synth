@@ -47,7 +47,6 @@ int Voice::GetNote()
     return note;
 }
 
-
 void Voice::FillBuffer()
 {
     buf = 0.0;

@@ -12,27 +12,25 @@ class ADSR
 {
 public:
     ADSR(int in_rate);
-
+    bool isActive();
     void Start(double in_attack,
                double in_decay,
                double in_sustain,
                double in_release);
     double Next(bool in_stop);    // returns next value and maintains state
-    bool isActive();
 
 private:
-    int rate;          // samples per seconds
-    State state;
-    bool stopped;
-    double attack;     // attack time [seconds]
-    double decay;      // decay time [seconds]
-    double sustain;    // sustain level [0.0 .. 1.0]
-    double release;    // release time [seconds]
 
-    int counter;       // ticks
     int attack_ticks;  // ticks
     int decay_ticks;   // ticks
+    double sustain;    // sustain level [0.0 .. 1.0]
     int release_ticks; // ticks
+
+    int rate;          // samples per seconds
+
+    State state;
+    bool stopped;
+    int counter;       // ticks
 };
 
 #endif // ADSR_H
