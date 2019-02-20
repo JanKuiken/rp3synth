@@ -62,13 +62,13 @@ snd_seq_t *open_seq(char *midi_name) {
     return(seq_handle);
 }
 
-void capture_keyboard(snd_seq_t *seq)
+void capture_keyboard(snd_seq_t *seq, int client, int port)
 {
     snd_seq_addr_t sender, dest;
     snd_seq_port_subscribe_t *subs;
-    sender.client = 20; // TODO: kan ik deze uit hw:.... van commando amidi -l vinden
-                        //       btw. nu gevonden met aconnect -l en trial and error....
-    sender.port = 1;    // TODO: idem
+
+    sender.client = client;
+    sender.port = port;
     dest.client = 128;
     dest.port = 0;
     snd_seq_port_subscribe_alloca(&subs);
@@ -80,7 +80,7 @@ void capture_keyboard(snd_seq_t *seq)
     snd_seq_subscribe_port(seq, subs);
 }
 
-snd_pcm_t *open_pcm(char *pcm_name) {
+snd_pcm_t *open_pcm(const char *pcm_name) {
 
     snd_pcm_t *playback_handle;
     snd_pcm_hw_params_t *hw_params;
@@ -188,20 +188,64 @@ int playback_callback (snd_pcm_sframes_t nframes) {
 void sig_handler(int s){
     continue_playing = false;
 }
+
+void usage()
+{
+    const std::string msg = "\n"
+"Usage:\n\n"
+"  rp3synth  pcm_device  midi_client  midi_port  settings_file\n\n"
+"    pcm_device:\n"
+"      something like: hw:0\n"
+"      number can be found with: aplay -l\n\n"
+"    midi_client  midi_port:\n"
+"      something like: 20 1\n"
+"      numbers can be found with: aconnect -l\n\n"
+"    settings_file:\n"
+"      path to a rp3synth settings file (might be not existing,\n"
+"                                        will be overwritten at exit)\n\n"
+"";
+      std::cout << msg << std::endl;
+      exit(-1);
+}
       
 int main (int argc, char *argv[]) {
 
-    RP3Synth synth = RP3Synth(POLY, RATE, BUFSIZE, "dus.txt");
+    std::string pcm_device;
+    int midi_client;
+    int midi_port;
+    std::string settings_file;
+
+
+    // parse arguments
+    if (argc !=5) {
+        usage();
+    }
+    pcm_device    = std::string(argv[1]);
+    try {
+        midi_client = std::stoi(argv[2]);
+    } catch (const std::exception& e) {
+        std::cout << "\nError: Could not convert 2nd argument to a midi client number\n";
+        usage();
+    }
+    try {
+        midi_port = std::stoi(argv[3]);
+    } catch (const std::exception& e) {
+        std::cout << "\nError: Could not convert 3nd argument to a midi port number\n" ;
+        usage();
+    }
+    settings_file = std::string(argv[4]);
+
+
+    RP3Synth synth = RP3Synth(POLY, RATE, BUFSIZE, settings_file);
 
     int nfds, seq_nfds, l1;
     struct pollfd *pfds;
 
     buf = (short *) malloc (2 * sizeof (short) * BUFSIZE);
 
-
-    playback_handle = open_pcm((char*)"hw:0"); // TODO moet anders. commandline parameter?
+    playback_handle = open_pcm(pcm_device.c_str());
     seq_handle = open_seq((char*)"default");
-    capture_keyboard(seq_handle);
+    capture_keyboard(seq_handle, midi_client, midi_port);
 
     seq_nfds = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
     nfds = snd_pcm_poll_descriptors_count (playback_handle);
@@ -251,6 +295,6 @@ int main (int argc, char *argv[]) {
     snd_seq_close (seq_handle);
     free(buf);
     cout << "\nBye...\n\n";
-    return (0);
+    return 0;
 }
      
