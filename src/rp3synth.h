@@ -20,6 +20,7 @@ public:
 
     void PlaybackCallback(short *buf);
     void MidiCallback(snd_seq_event_t *ev);
+    void Stop();
 
 private:
 

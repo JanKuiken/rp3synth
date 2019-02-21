@@ -8,7 +8,9 @@ class VoiceSettings
 public:
     VoiceSettings(const std::string& in_settings_file);
 
-    // read/write from/to file etc...
+    void Load();
+    void Save();
+
     // web interface...
     // smooth transition to new settings...
 
@@ -17,6 +19,9 @@ public:
     double decay;
     double sustain;
     double release;
+
+private:
+    std::string settings_file;
 };
 
 #endif // VOICESETTINGS_H

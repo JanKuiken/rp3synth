@@ -294,6 +294,7 @@ int main (int argc, char *argv[]) {
     snd_pcm_close (playback_handle);
     snd_seq_close (seq_handle);
     free(buf);
+    synth.Stop();
     cout << "\nBye...\n\n";
     return 0;
 }

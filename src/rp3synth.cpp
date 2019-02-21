@@ -106,3 +106,8 @@ std::shared_ptr<Voice> RP3Synth::FindActiveVoice(int in_note)
     }
     return nullptr;
 }
+
+void RP3Synth::Stop()
+{
+    voicesettings->Save();
+}
