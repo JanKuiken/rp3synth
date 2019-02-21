@@ -25,7 +25,7 @@ public:
 private:
 
     std::shared_ptr<Voice> FindFreeVoice();
-    std::shared_ptr<Voice> FindActiveVoice(int in_note);
+    std::vector<std::shared_ptr<Voice>> FindActiveVoices(int in_note);
 
     std::shared_ptr<VoiceSettings> voicesettings;
     std::shared_ptr<VoiceGlobals> voicegobals;

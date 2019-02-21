@@ -67,21 +67,9 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
             }
             break;
         case SND_SEQ_EVENT_NOTEOFF:
-            // stop all voices with this note
-            //bool cont = true;
-            //while (cont)
-            //{
-                voice = FindActiveVoice(ev->data.note.note);
-                if (voice)
-                {
-                    //std::cout << "Stop event" << std::endl;
-                    voice->Stop();
-                }
-            //    else
-            //    {
-            //        cont = false;
-            //    }
-            //}
+            for (auto voice : FindActiveVoices(ev->data.note.note)) {
+                voice->Stop();
+            }
             break;
     }
 }
@@ -96,15 +84,15 @@ std::shared_ptr<Voice> RP3Synth::FindFreeVoice()
     return nullptr;
 }
 
-std::shared_ptr<Voice> RP3Synth::FindActiveVoice(int in_note)
+std::vector<std::shared_ptr<Voice>> RP3Synth::FindActiveVoices(int in_note)
 {
-
+    std::vector<std::shared_ptr<Voice>> retval;
     for (auto voice : voices) {
         if (voice->IsActive() && voice->GetNote() == in_note) {
-            return voice;
+            retval.push_back(voice);
         }
     }
-    return nullptr;
+    return retval;
 }
 
 void RP3Synth::Stop()
