@@ -5,11 +5,12 @@ EXEDIR      := ../run
 
 OBJS        := main.o            \
                adsr.o            \
+               wave.o            \
                voice.o           \
                rp3synth.o        \
                voiceglobals.o    \
-               voicesettings.o   \
-               wavesine.o
+               voicesettings.o
+
 
 CC          := g++
 LINK        := g++

@@ -1,11 +1,11 @@
-#ifndef WAVESINE_H
-#define WAVESINE_H
+#ifndef WAVE_H
+#define WAVE_H
 
 
-class WaveSine
+class Wave
 {
 public:
-    WaveSine(int in_rate);
+    Wave(int in_rate);
 
     void Start(double in_frequency);
     double Next();
@@ -16,4 +16,4 @@ private:
     double phi_step;
 };
 
-#endif // WAVESINE_H
+#endif // WAVE_H

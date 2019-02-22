@@ -6,7 +6,7 @@
 
 #include "voicesettings.h"
 #include "voiceglobals.h"
-#include "wavesine.h"
+#include "wave.h"
 #include "adsr.h"
 
 class Voice
@@ -33,7 +33,7 @@ private:
     std::shared_ptr<VoiceGlobals> voice_globals;
 
     std::unique_ptr<ADSR> main_adsr;
-    std::unique_ptr<WaveSine> wave_sine;
+    std::unique_ptr<Wave> wave;
 
 };
 
