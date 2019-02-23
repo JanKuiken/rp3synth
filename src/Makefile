@@ -6,6 +6,7 @@ EXEDIR      := ../run
 OBJS        := main.o            \
                adsr.o            \
                wave.o            \
+               utils.o           \
                voice.o           \
                rp3synth.o        \
                voiceglobals.o    \
