@@ -6,6 +6,7 @@ Wave::Wave(std::shared_ptr<VoiceGlobals> in_voice_globals)
 {
     voice_globals = in_voice_globals;
     rate = voice_globals->rate;
+    filter = std::unique_ptr<Filter>(new Filter(rate));
 
     // strange stuff from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -18,6 +19,8 @@ void Wave::Start(double in_frequency, const std::string& in_wave) {
     phi_step = M_PI * in_frequency / (double)rate;
     waveform = StringToWaveform(in_wave);
     pitch_sensitivity = 0.1;
+
+    filter->Start(2.0 * in_frequency, 1.0);
 }
 
 WaveForm Wave::StringToWaveform(std::string in_wave) {
@@ -64,6 +67,9 @@ double Wave::Next() {
     if (phi >= 2 * M_PI) {
         phi -= 2 * M_PI * pow(2.0, -voice_globals->pitch * pitch_sensitivity);
     }
+
+    // apply filter
+    retval = filter->Next(retval);
     return retval;
 }
 

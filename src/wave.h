@@ -6,6 +6,8 @@
 #include <memory>
 
 #include "voiceglobals.h"
+#include "filter.h"
+
 
 enum WaveForm { sine,
                 square,
@@ -29,6 +31,7 @@ private:
 
     int rate;            // samples per seconds
     std::shared_ptr<VoiceGlobals> voice_globals;
+    std::unique_ptr<Filter> filter;
 
     WaveForm  waveform;
     double pitch_sensitivity;
