@@ -9,7 +9,7 @@ Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
     voice_globals = in_voice_globals;
     number = in_number;
 
-    wave = std::unique_ptr<Wave>(new Wave(voice_globals->rate));
+    wave = std::unique_ptr<Wave>(new Wave(voice_globals));
     main_adsr = std::unique_ptr<ADSR>(new ADSR(in_voice_globals->rate));
 
     buf.resize(voice_globals->bufsize, 0.0);

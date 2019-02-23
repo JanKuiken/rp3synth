@@ -2,9 +2,10 @@
 
 #include <cmath>
 
-Wave::Wave(int in_rate)
+Wave::Wave(std::shared_ptr<VoiceGlobals> in_voice_globals)
 {
-    rate = in_rate;
+    voice_globals = in_voice_globals;
+    rate = voice_globals->rate;
 
     // strange stuff from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -16,6 +17,7 @@ void Wave::Start(double in_frequency, const std::string& in_wave) {
     phi = 0.0;
     phi_step = M_PI * in_frequency / (double)rate;
     waveform = StringToWaveform(in_wave);
+    pitch_sensitivity = 0.1;
 }
 
 WaveForm Wave::StringToWaveform(std::string in_wave) {
@@ -60,7 +62,7 @@ double Wave::Next() {
     }
     phi += phi_step;
     if (phi >= 2 * M_PI) {
-        phi -= 2 * M_PI;
+        phi -= 2 * M_PI * pow(2.0, -voice_globals->pitch * pitch_sensitivity);
     }
     return retval;
 }

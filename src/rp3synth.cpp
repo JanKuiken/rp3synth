@@ -54,7 +54,9 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
 
     switch (ev->type) {
         case SND_SEQ_EVENT_PITCHBEND:
-            std::cout << "pitchbend : " << ev->data.control.value << std::endl;
+            // change value to -1.0... to 1.0 (at least for my keyboard)
+            voicegobals->pitch = ((ev->data.control.value-1) / 64) / 127.0;
+            std::cout << "pitchbend : " << voicegobals->pitch << std::endl;
             break;
         case SND_SEQ_EVENT_CONTROLLER:
             std::cout << "modulator : " << ev->data.control.value << std::endl;

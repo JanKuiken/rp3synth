@@ -3,6 +3,9 @@
 
 #include <string>
 #include <random>
+#include <memory>
+
+#include "voiceglobals.h"
 
 enum WaveForm { sine,
                 square,
@@ -14,7 +17,7 @@ enum WaveForm { sine,
 class Wave
 {
 public:
-    Wave(int in_rate);
+    Wave(std::shared_ptr<VoiceGlobals> in_voice_globals);
 
     void Start(double in_frequency, const std::string& in_wave);
     double Next();
@@ -25,7 +28,11 @@ private:
     WaveForm StringToWaveform(std::string in_wave);
 
     int rate;            // samples per seconds
+    std::shared_ptr<VoiceGlobals> voice_globals;
+
     WaveForm  waveform;
+    double pitch_sensitivity;
+
     double phi;
     double phi_step;
 
