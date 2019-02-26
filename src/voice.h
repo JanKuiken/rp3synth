@@ -32,8 +32,10 @@ private:
     std::shared_ptr<VoiceSettings> voice_settings;
     std::shared_ptr<VoiceGlobals> voice_globals;
 
-    std::unique_ptr<ADSR> main_adsr;
-    std::unique_ptr<Wave> wave;
+    std::unique_ptr<ADSR> adsr_1;
+    std::unique_ptr<ADSR> adsr_2;
+    std::unique_ptr<Wave> wave_1;
+    std::unique_ptr<Wave> wave_2;
 
 };
 
