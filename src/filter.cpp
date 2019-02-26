@@ -21,9 +21,11 @@ void Filter::Start(double in_frequency, std::string in_type, double in_sensitifi
         a_1 = 0.0;
         b_1 = fx;
         break;
-        a_0 = (1.0 + fx) / 2.0;
-        a_1 = (1.0 + fx) / 2.0;
+    case highpass:
+        a_0 =   (1.0 + fx) / 2.0;
+        a_1 = - (1.0 + fx) / 2.0;
         b_1 = fx;
+        break;
     default:
         a_0 = 1.0;
         a_1 = 0.0;
