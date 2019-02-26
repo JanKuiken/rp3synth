@@ -24,7 +24,7 @@ void Voice::Start(int in_note)
     double halve_note = pow(2.0, 1.0/12.0);
     double frequency = 440.0 * pow(halve_note, (note-57));
 
-    wave->Start(frequency, "sawtooth");
+    wave->Start(frequency, "noise");
     main_adsr->Start(voice_settings->attack,
                      voice_settings->decay,
                      voice_settings->sustain,

@@ -31,7 +31,8 @@ private:
 
     int rate;            // samples per seconds
     std::shared_ptr<VoiceGlobals> voice_globals;
-    std::unique_ptr<Filter> filter;
+    std::unique_ptr<Filter> filter_1;
+    std::unique_ptr<Filter> filter_2;
 
     WaveForm  waveform;
     double pitch_sensitivity;
