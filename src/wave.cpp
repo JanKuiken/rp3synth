@@ -1,6 +1,9 @@
 #include "wave.h"
 
+#include <iostream>  // TODO: moet weer weg
 #include <cmath>
+#include <random>
+
 #include "utils.h"
 
 Wave::Wave(std::shared_ptr<VoiceGlobals> in_voice_globals)
@@ -12,13 +15,17 @@ Wave::Wave(std::shared_ptr<VoiceGlobals> in_voice_globals)
 
     // strange stuff from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    gen = std::mt19937(rd()); //Standard mersenne_twister_engine seeded with rd()
-    dis = std::uniform_real_distribution<>(-1.0, 1.0);
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(-1.0, 1.0);
+    for (int i = 0; i < INT_PHI_MAX; i++) {
+        wave_noise[i] = dis(gen);
+    }
 }
 
 void Wave::Start(double in_frequency, const std::string& in_wave) {
     phi = 0.0;
     phi_step = M_PI * in_frequency / (double)rate;
+    int_phi = 0;
     waveform = StringToWaveform(in_wave);
     pitch_sensitivity = 0.0;
 
@@ -63,12 +70,16 @@ double Wave::Next() {
             }
         break;
         case noise:
-            retval = dis(gen);
+            retval = wave_noise[int_phi];
         break;
     }
     phi += phi_step;
     if (phi >= 2 * M_PI) {
         phi -= 2 * M_PI * pow(2.0, -voice_globals->pitch * pitch_sensitivity);
+    }
+    int_phi += 1;
+    if (int_phi >= INT_PHI_MAX) {
+        int_phi  = 0;
     }
 
     // apply filters

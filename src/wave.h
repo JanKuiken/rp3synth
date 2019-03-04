@@ -8,6 +8,7 @@
 #include "voiceglobals.h"
 #include "filter.h"
 
+const int INT_PHI_MAX = 123456; //quite an arbitrary number
 
 enum WaveForm { sine,
                 square,
@@ -39,9 +40,8 @@ private:
 
     double phi;
     double phi_step;
-
-    std::mt19937 gen;
-    std::uniform_real_distribution<> dis;
+    int int_phi;
+    double wave_noise[INT_PHI_MAX];
 };
 
 #endif // WAVE_H
