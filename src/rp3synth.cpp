@@ -3,6 +3,8 @@
 #include <iostream>  // TODO: moet weer weg
 #include <valarray>
 
+#include "utils.h"
+
 RP3Synth::RP3Synth(int in_n_voices,
                    int in_rate,
                    int in_bufsize,
@@ -65,7 +67,7 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
             voice = FindFreeVoice();
             if (voice)
             {
-                voice->Start(ev->data.note.note);
+                voice->Start(ev->data.note.note, ev->data.note.velocity);
             }
             break;
         case SND_SEQ_EVENT_NOTEOFF:

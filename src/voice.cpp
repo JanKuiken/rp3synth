@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "utils.h"
+
 Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
              std::shared_ptr<VoiceGlobals> in_voice_globals, int in_number)
 {
@@ -20,12 +22,14 @@ Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
     note = 0;
 }
 
-void Voice::Start(int in_note)
+void Voice::Start(int in_note, int in_velocity)
 {
     note = in_note;
 
     double halve_note = pow(2.0, 1.0/12.0);
     double frequency = 440.0 * pow(halve_note, (note-57));
+    double velocity = bounds_limit(in_velocity / 127.0, 0.0, 1.0);
+    velocity_factor = sqrt(velocity);
 
     wave_1->Start(frequency, "square");
     adsr_1->Start(voice_settings->attack,
@@ -60,8 +64,8 @@ void Voice::FillBuffer()
 {
     buf = 0.0;
     for (int i=0; i<voice_globals->bufsize; i++) {
-        buf[i] =   1.0 * wave_1->Next() * adsr_1->Next(stop)
-                 + 1.0 * wave_2->Next() * adsr_2->Next(stop);
+        buf[i] = velocity_factor *  (  wave_1->Next() * adsr_1->Next(stop)
+                                     + wave_2->Next() * adsr_2->Next(stop) );
     }
     active = adsr_1->isActive();
 }
