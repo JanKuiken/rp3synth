@@ -73,6 +73,9 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
                 voice->Stop();
             }
             break;
+        case SND_SEQ_EVENT_KEYPRESS:
+            std::cout << "aftertouch : " << ev->data.control.value << std::endl;
+            break;
     }
 }
 
