@@ -33,6 +33,8 @@ private:
     std::shared_ptr<VoiceGlobals> voice_globals;
 
     double velocity_factor;
+    double gain_1;
+    double gain_2;
     std::unique_ptr<ADSR> adsr_1;
     std::unique_ptr<ADSR> adsr_2;
     std::unique_ptr<Wave> wave_1;

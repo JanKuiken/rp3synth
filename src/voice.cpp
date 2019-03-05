@@ -31,17 +31,19 @@ void Voice::Start(int in_note, int in_velocity)
     double velocity = bounds_limit(in_velocity / 127.0, 0.0, 1.0);
     velocity_factor = sqrt(velocity);
 
-    wave_1->Start(frequency, "square");
-    adsr_1->Start(voice_settings->attack,
-                  voice_settings->decay,
-                  voice_settings->sustain,
-                  voice_settings->release);
+    gain_1 = voice_settings->gain_1;
+    wave_1->Start(frequency, voice_settings->waveform_1);
+    adsr_1->Start(voice_settings->attack_1,
+                  voice_settings->decay_1,
+                  voice_settings->sustain_1,
+                  voice_settings->release_1);
 
-    wave_2->Start(frequency, "noise");
-    adsr_2->Start(voice_settings->attack * 2.0,
-                  voice_settings->decay * 0.5,
-                  voice_settings->sustain * 0.4,
-                  0.0);
+    gain_2 = voice_settings->gain_2;
+    wave_2->Start(frequency, voice_settings->waveform_2);
+    adsr_2->Start(voice_settings->attack_2,
+                  voice_settings->decay_2,
+                  voice_settings->sustain_2,
+                  voice_settings->release_2);
     active = true;
     stop = false;
 }
@@ -64,8 +66,11 @@ void Voice::FillBuffer()
 {
     buf = 0.0;
     for (int i=0; i<voice_globals->bufsize; i++) {
-        buf[i] = velocity_factor *  (  wave_1->Next() * adsr_1->Next(stop)
-                                     + wave_2->Next() * adsr_2->Next(stop) );
+
+        buf[i] = velocity_factor *
+            (  gain_1 * wave_1->Next() * adsr_1->Next(stop)
+             + gain_2 * wave_2->Next() * adsr_2->Next(stop) );
+
     }
-    active = adsr_1->isActive();
+    active = adsr_1->isActive() || adsr_2->isActive();
 }
