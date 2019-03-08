@@ -9,6 +9,7 @@ OBJS        := main.o            \
                utils.o           \
                voice.o           \
                filter.o          \
+               chorus.o          \
                rp3synth.o        \
                voiceglobals.o    \
                voicesettings.o

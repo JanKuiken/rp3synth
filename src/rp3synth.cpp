@@ -17,6 +17,7 @@ RP3Synth::RP3Synth(int in_n_voices,
     for (int i=0; i<in_n_voices; i++) {
         voices.emplace_back(std::make_shared<Voice>(voicesettings, voicegobals, i));
     }
+    chorus = std::make_unique<Chorus>();
     std::cout << "RP3Synth constructor end" << std::endl;
 }
 
@@ -25,6 +26,7 @@ void RP3Synth::PlaybackCallback(short* buf)
     std::valarray<double> tmp_buf;
     tmp_buf.resize(voicegobals->bufsize, 0.0);
 
+    // collect voice signals
     for (std::shared_ptr<Voice> voice : voices) {
         if (voice->IsActive()) {
             voice->FillBuffer();
@@ -32,14 +34,16 @@ void RP3Synth::PlaybackCallback(short* buf)
         }
     }
 
+    // apply chorus
+    // chorus->Apply(std::make_shared<std::valarray<double>>(tmp_buf));
+
+    // ALSA output
     memset(buf, 0, voicegobals->bufsize * 4);
-    int l1;
-    for (l1 = 0; l1 < voicegobals->bufsize; l1++) {
+    for (int i=0;  i < voicegobals->bufsize; i++) {
         short sound;
-        sound = (2^16/2) + 5000.0 * tmp_buf[l1];
-        //sound = (2^16/2) + 5000.0 * (double)rand() / RAND_MAX;
-        buf[2 * l1] += sound;
-        buf[2 * l1 + 1] += sound;
+        sound = (2^16/2) + 5000.0 * tmp_buf[i];
+        buf[2 * i] += sound;
+        buf[2 * i + 1] += sound;
     }
 }
 
@@ -59,7 +63,12 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
             voicegobals->pitch = bounds_limit((ev->data.control.value-1) / (64 * 127.0), -1.0, 1.0);
             break;
         case SND_SEQ_EVENT_CONTROLLER:
-            std::cout << "modulator : " << ev->data.control.value << std::endl;
+            std::cout << "modulator : "
+                      << ev->data.control.param
+                      << ", "
+                      << ev->data.control.value
+                      << std::endl;
+            voicegobals->SetModulation(ev->data.control.param, ev->data.control.value);
             break;
         case SND_SEQ_EVENT_NOTEON:
             voice = FindFreeVoice();
