@@ -17,7 +17,7 @@ RP3Synth::RP3Synth(int in_n_voices,
     for (int i=0; i<in_n_voices; i++) {
         voices.emplace_back(std::make_shared<Voice>(voicesettings, voicegobals, i));
     }
-    chorus = std::make_unique<Chorus>();
+    chorus = std::make_unique<Chorus>(voicegobals);
     std::cout << "RP3Synth constructor end" << std::endl;
 }
 
@@ -35,7 +35,7 @@ void RP3Synth::PlaybackCallback(short* buf)
     }
 
     // apply chorus
-    // chorus->Apply(std::make_shared<std::valarray<double>>(tmp_buf));
+    chorus->Apply(&tmp_buf);
 
     // ALSA output
     memset(buf, 0, voicegobals->bufsize * 4);
@@ -63,11 +63,6 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
             voicegobals->pitch = bounds_limit((ev->data.control.value-1) / (64 * 127.0), -1.0, 1.0);
             break;
         case SND_SEQ_EVENT_CONTROLLER:
-            std::cout << "modulator : "
-                      << ev->data.control.param
-                      << ", "
-                      << ev->data.control.value
-                      << std::endl;
             voicegobals->SetModulation(ev->data.control.param, ev->data.control.value);
             break;
         case SND_SEQ_EVENT_NOTEON:

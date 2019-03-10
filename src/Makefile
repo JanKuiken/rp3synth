@@ -18,7 +18,7 @@ OBJS        := main.o            \
 CC          := g++
 LINK        := g++
 
-CCLAGS      := -std=c++11 -Wall -O2
+CCLAGS      := -std=c++14 -Wall -O2
 #CXXFLAGS    := -std=c++11 -Wall -Wextra -O2
 #CXXFLAGS    := -std=c++11 -Wwrite-strings -fpermissive -O2
 
