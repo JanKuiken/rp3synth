@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <valarray>
-#include <vector>
 
 #include "voiceglobals.h"
 

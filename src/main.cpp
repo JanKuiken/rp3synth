@@ -29,10 +29,9 @@
 
 #include "rp3synth.h"
 
-#define POLY    8
-#define RATE    44100
-#define BUFSIZE 512
-
+const int POLY    = 8;
+const int RATE    = 44100;
+const int BUFSIZE = 512;
 
 using namespace std;
 
@@ -106,92 +105,13 @@ snd_pcm_t *open_pcm(const char *pcm_name) {
     return playback_handle;
 }
 
-int midi_callback() {
-/*
-    snd_seq_event_t *ev;
-    int l1;
-  
-    do {
-        snd_seq_event_input(seq_handle, &ev);
-
-
-      if ((ev->type == SND_SEQ_EVENT_NOTEON) && (ev->data.note.velocity == 0)) ev->type = SND_SEQ_EVENT_NOTEOFF;
-
-      switch (ev->type) {
-            case SND_SEQ_EVENT_PITCHBEND:
-                pitch = (double)ev->data.control.value / 8192.0;
-                break;
-            case SND_SEQ_EVENT_CONTROLLER:
-                if (ev->data.control.param == 1) {
-                    modulation = (double)ev->data.control.value / 10.0;
-                } 
-                break;
-            case SND_SEQ_EVENT_NOTEON:
-                for (l1 = 0; l1 < POLY; l1++) {
-                    if (!note_active[l1]) {
-                        note[l1] = ev->data.note.note;
-                        velocity[l1] = ev->data.note.velocity / 127.0;
-                        env_time[l1] = 0;
-                        gate[l1] = 1;
-                        note_active[l1] = 1;
-                        break;
-                    }
-                }
-                break;        
-            case SND_SEQ_EVENT_NOTEOFF:
-                for (l1 = 0; l1 < POLY; l1++) {
-                    if (gate[l1] && note_active[l1] && (note[l1] == ev->data.note.note)) {
-                        env_time[l1] = 0;
-                        gate[l1] = 0;
-                    }
-                }
-                break;        
-        }
-        snd_seq_free_event(ev);
-    } while (snd_seq_event_input_pending(seq_handle, 0) > 0);
-*/
-    return (0);
-}
-
-int playback_callback (snd_pcm_sframes_t nframes) {
-/*
-    int l1, l2;
-    double dphi, dphi_mod, f1, f2, f3, freq_note, sound;
-      
-    memset(buf, 0, nframes * 4);
-    for (l2 = 0; l2 < POLY; l2++) {
-        if (note_active[l2]) {
-            f1 = 8.176 * exp((double)(transpose+note[l2]-2)*log(2.0)/12.0);
-            f2 = 8.176 * exp((double)(transpose+note[l2])*log(2.0)/12.0);
-            f3 = 8.176 * exp((double)(transpose+note[l2]+2)*log(2.0)/12.0);
-            freq_note = (pitch > 0) ? f2 + (f3-f2)*pitch : f2 + (f2-f1)*pitch;
-            dphi = M_PI * freq_note / 22050.0;                                    
-            dphi_mod = dphi * (double)harmonic / (double)subharmonic;
-            for (l1 = 0; l1 < nframes; l1++) {
-                phi[l2] += dphi;
-                phi_mod[l2] += dphi_mod;
-                if (phi[l2] > 2.0 * M_PI) phi[l2] -= 2.0 * M_PI;
-                if (phi_mod[l2] > 2.0 * M_PI) phi_mod[l2] -= 2.0 * M_PI;
-                sound = GAIN * 1.0
-                             * velocity[l2] * sin(phi[l2] + modulation * sin(phi_mod[l2]));
-                env_time[l2] += 1.0 / 44100.0;
-                buf[2 * l1] += sound;
-                buf[2 * l1 + 1] += sound;
-            }
-        }    
-    }
-    return snd_pcm_writei (playback_handle, buf, nframes); 
-*/
-    return 0;
-}
-
 void sig_handler(int s){
     continue_playing = false;
 }
 
 void usage()
 {
-    const std::string msg = "\n"
+    std::cout <<
 "Usage:\n\n"
 "  rp3synth  pcm_device  midi_client  midi_port  settings_file\n\n"
 "    pcm_device:\n"
@@ -204,8 +124,6 @@ void usage()
 "      path to a rp3synth settings file (might be not existing,\n"
 "                                        will be overwritten at exit)\n\n"
 "";
-      std::cout << msg << std::endl;
-      exit(-1);
 }
       
 int main (int argc, char *argv[]) {
@@ -219,6 +137,7 @@ int main (int argc, char *argv[]) {
     // parse arguments
     if (argc !=5) {
         usage();
+        exit(-1);
     }
     pcm_device    = std::string(argv[1]);
     try {
@@ -234,7 +153,6 @@ int main (int argc, char *argv[]) {
         usage();
     }
     settings_file = std::string(argv[4]);
-
 
     RP3Synth synth = RP3Synth(POLY, RATE, BUFSIZE, settings_file);
 
@@ -263,7 +181,6 @@ int main (int argc, char *argv[]) {
     while (continue_playing) {
         if (poll (pfds, seq_nfds + nfds, 1000) > 0) {
             for (l1 = 0; l1 < seq_nfds; l1++) {
-               //if (pfds[l1].revents > 0) midi_callback();
                if (pfds[l1].revents > 0)
                {
                     snd_seq_event_t *ev;
@@ -278,8 +195,6 @@ int main (int argc, char *argv[]) {
             }
             for (l1 = seq_nfds; l1 < seq_nfds + nfds; l1++) {    
                 if (pfds[l1].revents > 0) { 
-                    // if (playback_callback(BUFSIZE) < BUFSIZE) {
-                    // return snd_pcm_writei (playback_handle, buf, nframes);
                     synth.PlaybackCallback(buf);
                     int size = snd_pcm_writei (playback_handle, buf, BUFSIZE);
                     if (size < BUFSIZE) {
