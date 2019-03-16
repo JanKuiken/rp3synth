@@ -2,6 +2,7 @@
 
 #include <iostream>  // TODO: moet weer weg
 #include <valarray>
+#include <thread>
 
 #include "utils.h"
 
@@ -26,12 +27,21 @@ void RP3Synth::PlaybackCallback(short* buf)
     std::valarray<double> tmp_buf;
     tmp_buf.resize(voicegobals->bufsize, 0.0);
 
+    // start threads for FillBuffer
+    std::vector<std::shared_ptr<std::thread>> threads;
+    std::vector<std::shared_ptr<Voice>> active_voices = FindActiveVoices();
+    for (std::shared_ptr<Voice> voice : active_voices ) {
+        threads.emplace_back(std::make_shared<std::thread>(std::thread(
+          [](std::shared_ptr<Voice> v) {v->FillBuffer();} , voice
+        )));
+    }
+    // wait for threads to finish
+    for (std::shared_ptr<std::thread> th : threads) {
+        th->join();
+    }
     // collect voice signals
-    for (std::shared_ptr<Voice> voice : voices) {
-        if (voice->IsActive()) {
-            voice->FillBuffer();
-            tmp_buf += voice->buf;
-        }
+    for (std::shared_ptr<Voice> voice : active_voices) {
+        tmp_buf += voice->buf;
     }
 
     // apply chorus
@@ -91,6 +101,17 @@ std::shared_ptr<Voice> RP3Synth::FindFreeVoice()
         }
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Voice>> RP3Synth::FindActiveVoices()
+{
+    std::vector<std::shared_ptr<Voice>> retval;
+    for (auto voice : voices) {
+        if (voice->IsActive()) {
+            retval.push_back(voice);
+        }
+    }
+    return retval;
 }
 
 std::vector<std::shared_ptr<Voice>> RP3Synth::FindActiveVoices(int in_note)
