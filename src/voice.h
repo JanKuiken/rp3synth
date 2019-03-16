@@ -13,7 +13,7 @@ class Voice
 {
 public:
     Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
-          std::shared_ptr<VoiceGlobals> in_voice_globals, int in_number);
+          std::shared_ptr<VoiceGlobals> in_voice_globals);
 
     void Start(int in_note, int in_velocity);
     void Stop();
@@ -22,7 +22,6 @@ public:
     void FillBuffer();
 
     std::valarray<double> buf;
-    int number;
 
 private:
     int note;

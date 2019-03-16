@@ -5,11 +5,10 @@
 #include "utils.h"
 
 Voice::Voice(std::shared_ptr<VoiceSettings> in_voice_settings,
-             std::shared_ptr<VoiceGlobals> in_voice_globals, int in_number)
+             std::shared_ptr<VoiceGlobals> in_voice_globals)
 {
     voice_settings = in_voice_settings;
     voice_globals = in_voice_globals;
-    number = in_number;
 
     wave_1 = std::unique_ptr<Wave>(new Wave(voice_globals));
     adsr_1 = std::unique_ptr<ADSR>(new ADSR(in_voice_globals->rate));

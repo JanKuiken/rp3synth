@@ -16,7 +16,7 @@ RP3Synth::RP3Synth(int in_n_voices,
     voicesettings = std::make_shared<VoiceSettings>(in_settings_file);
     voicegobals = std::make_shared<VoiceGlobals>(in_rate, in_bufsize);
     for (int i=0; i<in_n_voices; i++) {
-        voices.emplace_back(std::make_shared<Voice>(voicesettings, voicegobals, i));
+        voices.emplace_back(std::make_shared<Voice>(voicesettings, voicegobals));
     }
     chorus = std::make_unique<Chorus>(voicegobals);
     std::cout << "RP3Synth constructor end" << std::endl;
@@ -28,16 +28,16 @@ void RP3Synth::PlaybackCallback(short* buf)
     tmp_buf.resize(voicegobals->bufsize, 0.0);
 
     // start threads for FillBuffer
-    std::vector<std::shared_ptr<std::thread>> threads;
+    std::vector<std::thread> threads;
     std::vector<std::shared_ptr<Voice>> active_voices = FindActiveVoices();
     for (std::shared_ptr<Voice> voice : active_voices ) {
-        threads.emplace_back(std::make_shared<std::thread>(std::thread(
-          [](std::shared_ptr<Voice> v) {v->FillBuffer();} , voice
-        )));
+        threads.emplace_back(std::thread(
+            [](std::shared_ptr<Voice> v) {v->FillBuffer();} , voice
+        ));
     }
     // wait for threads to finish
-    for (std::shared_ptr<std::thread> th : threads) {
-        th->join();
+    for (std::thread& th : threads) {
+        th.join();
     }
     // collect voice signals
     for (std::shared_ptr<Voice> voice : active_voices) {
