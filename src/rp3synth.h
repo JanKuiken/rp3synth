@@ -8,6 +8,7 @@
 
 #include "voicesettings.h"
 #include "voiceglobals.h"
+#include "chorus.h"
 #include "voice.h"
 
 class RP3Synth
@@ -20,15 +21,18 @@ public:
 
     void PlaybackCallback(short *buf);
     void MidiCallback(snd_seq_event_t *ev);
+    void Stop();
 
 private:
 
     std::shared_ptr<Voice> FindFreeVoice();
-    std::shared_ptr<Voice> FindActiveVoice(int in_note);
+    std::vector<std::shared_ptr<Voice>> FindActiveVoices();
+    std::vector<std::shared_ptr<Voice>> FindActiveVoices(int in_note);
 
     std::shared_ptr<VoiceSettings> voicesettings;
     std::shared_ptr<VoiceGlobals> voicegobals;
     std::vector<std::shared_ptr<Voice>> voices;
+    std::unique_ptr<Chorus> chorus;
 };
 
 #endif // RP3SYNTH_H

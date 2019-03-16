@@ -1,6 +1,7 @@
 #ifndef VOICEGLOBALS_H
 #define VOICEGLOBALS_H
 
+const int n_modulations = 128;
 
 class VoiceGlobals
 {
@@ -12,8 +13,10 @@ public:
     int bufsize;
 
     // variables
-    double pitch;       // pitchwheel value from MIDI keyboard
-    double modulation;  // modwheel value from MIDI keyboard
+    double pitch;                      // pitchwheel value from MIDI keyboard
+    double modulation[n_modulations];  // modulation values from MIDI keyboard
+
+    void SetModulation(unsigned int param, int value);
 
 };
 
