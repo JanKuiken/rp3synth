@@ -12,6 +12,7 @@ OBJS        := main.o            \
                chorus.o          \
                rp3synth.o        \
                voiceglobals.o    \
+               delayedsignal.o   \
                voicesettings.o
 
 

@@ -5,6 +5,7 @@
 #include <valarray>
 
 #include "voiceglobals.h"
+#include "delayedsignal.h"
 
 class Chorus
 {
@@ -15,15 +16,9 @@ public:
 
 private:
     std::shared_ptr<VoiceGlobals> voice_globals;
-    std::valarray<double> history;  // ringbuffer of the incoming signal
-    int rate;                       // samples per seconds
-    int bufsize;
-    int n_buffers;
-    int current_buffer;
-    int delay_offset;               // start point for chorus in samples
-    int max_depth;                  // max chorus depth in samples
-    double phi;
+    std::shared_ptr<DelayedSignal> delayed_signal;
 
+    double phi;
 };
 
 #endif // CHORUS_H
