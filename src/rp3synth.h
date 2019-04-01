@@ -9,6 +9,7 @@
 #include "voicesettings.h"
 #include "voiceglobals.h"
 #include "chorus.h"
+#include "reverb.h"
 #include "voice.h"
 
 class RP3Synth
@@ -33,6 +34,7 @@ private:
     std::shared_ptr<VoiceGlobals> voicegobals;
     std::vector<std::shared_ptr<Voice>> voices;
     std::unique_ptr<Chorus> chorus;
+    std::unique_ptr<Reverb> reverb;
 };
 
 #endif // RP3SYNTH_H

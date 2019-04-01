@@ -10,10 +10,7 @@ Chorus::Chorus(std::shared_ptr<VoiceGlobals> in_voice_globals)
 {
     voice_globals = in_voice_globals;
     delayed_signal = std::make_shared<DelayedSignal>(
-         DelayedSignal(voice_globals->rate,
-                       voice_globals->bufsize,
-                       DELAY + 2 * MAX_DEPTH
-         )
+         DelayedSignal(voice_globals->rate, DELAY + 2 * MAX_DEPTH)
     );
     phi  = 0.0;
 }
@@ -21,29 +18,24 @@ Chorus::Chorus(std::shared_ptr<VoiceGlobals> in_voice_globals)
 
 void Chorus::Apply(std::valarray<double>* buffer)
 {
-    // copy buffer to history
-    delayed_signal->AddBuffer(buffer);
-
     // get parmeters from (my) keyboard knobs (modulators) (we don't store them yet)
     double gain      = voice_globals->modulation[21];
     double depth     = voice_globals->modulation[22];
     double frequency = voice_globals->modulation[23] * MAX_FREQUENCY;
 
-    // create and fill chorused buffer
-    std::valarray<double> chorused_buf(voice_globals->bufsize);
     double phi_step = 2.0 * M_PI * frequency / (double)voice_globals->rate;
 
     for (int i=0; i<voice_globals->bufsize; i++) {
+
         phi += phi_step;
         if (phi > 2.0 * M_PI) {
             phi -=  2 * M_PI;
         }
+
+        delayed_signal->AddValue((*buffer)[i]);
         double delay_seconds = DELAY + MAX_DEPTH * depth * sin(phi);
-        chorused_buf[i] = delayed_signal->DelayedValue(delay_seconds);
+        double chorused_value = delayed_signal->DelayedValue(delay_seconds);
+        (*buffer)[i] += gain * chorused_value / (1.0 + gain);
 
-        delayed_signal->AdvanceIndex();
     }
-
-    // add chorus signal
-    *buffer += gain * chorused_buf / (1.0 + gain);
 }

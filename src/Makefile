@@ -10,6 +10,7 @@ OBJS        := main.o            \
                voice.o           \
                filter.o          \
                chorus.o          \
+               reverb.o          \
                rp3synth.o        \
                voiceglobals.o    \
                delayedsignal.o   \

@@ -19,6 +19,7 @@ RP3Synth::RP3Synth(int in_n_voices,
         voices.emplace_back(std::make_shared<Voice>(voicesettings, voicegobals));
     }
     chorus = std::make_unique<Chorus>(voicegobals);
+    reverb = std::make_unique<Reverb>(voicegobals);
     std::cout << "RP3Synth constructor end" << std::endl;
 }
 
@@ -36,18 +37,19 @@ void RP3Synth::PlaybackCallback(short* buf)
         ));
     }
     // wait for threads to finish
-    for (std::thread& th : threads) {
-        th.join();
+    for (std::thread& thread : threads) {
+        thread.join();
     }
     // collect voice signals
     for (std::shared_ptr<Voice> voice : active_voices) {
         tmp_buf += voice->buf;
     }
 
-    // apply chorus
+    // apply chorus & reverb
     chorus->Apply(&tmp_buf);
+    reverb->Apply(&tmp_buf);
 
-    // ALSA output
+    // output to ALSA
     memset(buf, 0, voicegobals->bufsize * 4);
     for (int i=0;  i < voicegobals->bufsize; i++) {
         short sound;
@@ -74,6 +76,7 @@ void RP3Synth::MidiCallback(snd_seq_event_t *ev)
             break;
         case SND_SEQ_EVENT_CONTROLLER:
             voicegobals->SetModulation(ev->data.control.param, ev->data.control.value);
+            // std::cout << ev->data.control.param << " " << ev->data.control.value << std::endl;
             break;
         case SND_SEQ_EVENT_NOTEON:
             voice = FindFreeVoice();
