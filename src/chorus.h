@@ -4,17 +4,22 @@
 #include <memory>
 #include <valarray>
 
+#include "voicesettings.h"
 #include "voiceglobals.h"
 
 class Chorus
 {
 public:
-    Chorus(std::shared_ptr<VoiceGlobals> in_voice_globals);
+    Chorus(std::shared_ptr<VoiceSettings> in_voice_settings,
+           std::shared_ptr<VoiceGlobals> in_voice_globals);
+    ~Chorus();
 
     void Apply(std::valarray<double>* buffer);
 
 private:
+    std::shared_ptr<VoiceSettings> voice_settings;
     std::shared_ptr<VoiceGlobals> voice_globals;
+
     std::valarray<double> history;  // ringbuffer of the incoming signal
     int rate;                       // samples per seconds
     int bufsize;

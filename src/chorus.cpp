@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <iostream>  // TODO: moet weer weg
+
 // short helper function, for (reasonable) negative array indices
 inline int posmod(int i, int n) { return (i % n + n) % n; }
 
@@ -11,8 +13,10 @@ const double depth         = 0.001;  // seconds
 const double max_frequency = 10.0;   // Hz
 
 
-Chorus::Chorus(std::shared_ptr<VoiceGlobals> in_voice_globals)
+Chorus::Chorus(std::shared_ptr<VoiceSettings> in_voice_settings,
+               std::shared_ptr<VoiceGlobals> in_voice_globals)
 {
+    voice_settings = in_voice_settings;
     voice_globals = in_voice_globals;
     rate          = voice_globals->rate;
     bufsize       = voice_globals->bufsize;
@@ -29,6 +33,10 @@ Chorus::Chorus(std::shared_ptr<VoiceGlobals> in_voice_globals)
     phi = 0.0;
 }
 
+Chorus::~Chorus()
+{
+    // std::cout << "Chorus destructor" << std::endl;
+}
 
 void Chorus::Apply(std::valarray<double>* buffer)
 {
@@ -38,9 +46,9 @@ void Chorus::Apply(std::valarray<double>* buffer)
     history[std::slice(start, bufsize, 1)] = *buffer;
 
     // get parmeters from (my) keyboard knobs (modulators) (we don't store them yet)
-    double gain      = voice_globals->modulation[21];
-    double depth     = voice_globals->modulation[22];
-    double frequency = voice_globals->modulation[23] * max_frequency;
+    double gain      = voice_settings->chorus_gain;
+    double depth     = voice_settings->chorus_depth;
+    double frequency = voice_settings->chorus_frequency * max_frequency;
 
     // create and fill chorused buffer
     std::valarray<double> chorused_buf(bufsize);

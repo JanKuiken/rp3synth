@@ -1,9 +1,19 @@
 #include "adsr.h"
 
+#include <iostream>  // TODO: moet weer weg
+#include <algorithm>
+
+const double min_time = 0.001;
+
 ADSR::ADSR(int in_rate) {
     rate    = in_rate;
     state   = idle;
     stopped = false;
+
+    // logger = std::make_unique<Logger<double>>("log_adsr", std::size_t(1000));
+}
+
+ADSR::~ADSR() {
 }
 
 bool ADSR::isActive() {
@@ -15,60 +25,74 @@ void ADSR::Start(double in_attack,
                  double in_sustain,
                  double in_release) {
 
-    attack_ticks  = rate * in_attack;
-    decay_ticks   = rate * in_decay;
-    sustain       =        in_sustain;
-    release_ticks = rate * in_release;
+    // sanity checks
+    double attack  = std::max(0.0, in_attack);
+    double decay   = std::max(0.0, in_decay);
+    double release = std::max(0.0, in_release);
 
-    state   = key_attack;
-    stopped = false;
+    sustain_level  = std::min(1.0, std::max(0.0, in_sustain));
+
+    attack_rate  = 1.0                   / (rate * (min_time + attack));
+    decay_rate   = (1.0 - sustain_level) / (rate * (min_time + decay));
+    release_rate = (sustain_level)       / (rate * (min_time + release));
+
+    state       = key_attack;
+    stopped     = false;
+    current_val = 0.0;
+
+    // fix to leading avoid tick if a == 0 and d == 0
+    if (attack == 0.0 && decay == 0.0) {
+        current_val = sustain_level;
+        state = key_sustain;
+    } else if (attack == 0.0) {
+        current_val = 1.0;
+        state = key_decay;
+    }
 }
 
 double ADSR::Next(bool in_stop) {
 
-    stopped = in_stop;
-    double retval = 0.0;
+    if (in_stop) {
+        stopped = true;
+        state = key_release;
+    }
 
     switch (state) {
 
     case idle:
-        retval = 0.0;
+        current_val = 0.0;
         break;
 
     case key_attack:
-        retval = (double)counter / (double)attack_ticks;
-        counter++;
-        if (counter > attack_ticks) {
+        current_val += attack_rate;
+        if (current_val >= 1.0) {
+            current_val = 1.0;
             state = key_decay;
-            counter = 0;
         }
         break;
 
     case key_decay:
-        retval = 1.0 - (1.0 - sustain) * ((double)counter / (double)decay_ticks);
-        counter++;
-        if (counter > decay_ticks) {
+        current_val -= attack_rate;
+        if (current_val <= sustain_level) {
+            current_val = sustain_level;
             state = key_sustain;
-            counter = 0;
         }
         break;
 
     case key_sustain:
-        retval = sustain;
-        if (stopped) {
-            state = key_release;
-            counter = 0;
-        }
+        current_val = sustain_level;
         break;
 
     case key_release:
-        retval = sustain * (1.0 - (double)counter / (double)release_ticks);
-        counter++;
-        if (counter >= release_ticks) {
+        current_val -= release_rate;
+        if (current_val <= 0.0) {
+            current_val = 0.0;
             state = idle;
+            //std::cout << "release val " << current_val << " " << state << std::endl;
         }
         break;
     }
-    return retval;
-}
 
+    //logger->Log(retval);
+    return current_val;
+}
